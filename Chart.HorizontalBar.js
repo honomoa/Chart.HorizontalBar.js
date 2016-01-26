@@ -278,7 +278,7 @@
 			//Set up tooltip events on the chart
 			if (this.options.showTooltips){
 				helpers.bindEvents(this, this.options.tooltipEvents, function(evt){
-					var activeBars = (evt.type !== 'mouseout') ? this.getBarsAtEvent(evt) : [];
+					var activeBars = (evt.type !== 'mouseout') ? (this.options.showAllTooltips?this.getAllBarsAtEvent(evt):this.getBarsAtEvent(evt)) : [];
 
 					this.eachBars(function(bar){
 						bar.restore(['fillColor', 'strokeColor']);
@@ -356,6 +356,27 @@
 			helpers.each(this.datasets,function(dataset, datasetIndex){
 				helpers.each(dataset.bars, callback, this, datasetIndex);
 			},this);
+		},
+		getAllBarsAtEvent : function(e){
+			var barsArray = [],
+				eventPosition = helpers.getRelativePosition(e),
+				barIndex,
+				oneEver = false;
+
+			for (var datasetIndex = 0; datasetIndex < this.datasets.length; datasetIndex++) {
+				for (barIndex = 0; barIndex < this.datasets[datasetIndex].bars.length; barIndex++) {
+					if (this.datasets[datasetIndex].bars[barIndex].inRange(eventPosition.x,eventPosition.y)){
+						oneEver = true;
+					}
+				}
+			}
+			if (oneEver) {
+				this.eachBars(function(bar){
+					barsArray.push(bar);
+				});
+			}
+
+			return barsArray;
 		},
 		getBarsAtEvent : function(e){
 			var barsArray = [],
